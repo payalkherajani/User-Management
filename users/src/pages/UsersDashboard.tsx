@@ -12,6 +12,7 @@ import {
   Avatar,
   Box,
   IconButton,
+  Button
 } from "@mui/material";
 import Layout from "../components/Layout";
 import { toast } from "react-toastify";
@@ -23,8 +24,10 @@ import {
   KeyboardArrowRight,
   KeyboardArrowLeft,
   ModeEditOutlineOutlined,
-  FileCopyOutlined
+  FileCopyOutlined,
+  AddOutlined
 } from "@mui/icons-material";
+import UserDialog from "../components/UserDialog";
 
 interface TablePaginationActionsProps {
   count: number;
@@ -112,20 +115,29 @@ function UsersDashboard() {
     currentPage: 0,
     per_page: 0,
     total: 0,
-    total_pages: 0
+    total_pages: 0,
+  });
+  const [open,setOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState({
+    name: '',
+    job: '',
+    id: 0,
   })
+  const [type, setType] = useState<'add' | 'edit' | null>(null)
 
   const getAllUsers = async (page: number) => {
     try {
-      const response = await axios.get(`https://reqres.in/api/users?page=${page}`);
+      const response = await axios.get(
+        `https://reqres.in/api/users?page=${page}`
+      );
       setUsers(response.data.data);
       setPageInfo({
         ...pageInfo,
         currentPage: page,
         per_page: response.data.per_page,
         total: response.data.total,
-        total_pages: response.data.total_pages
-      })
+        total_pages: response.data.total_pages,
+      });
     } catch (error: any) {
       toast.error(error, {
         position: "bottom-center",
@@ -139,30 +151,72 @@ function UsersDashboard() {
       });
     }
   };
-  useEffect(() => {
-    getAllUsers(pageInfo.currentPage);
-  }, []);
 
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
   ) => {
-     setPageInfo({ ...pageInfo, currentPage: newPage});
-     getAllUsers(newPage)
+    setPageInfo({ ...pageInfo, currentPage: newPage });
+    if(pageInfo.currentPage !== newPage){
+      getAllUsers(newPage);
+    }
   };
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setPageInfo({ ...pageInfo, per_page: parseInt(event.target.value, 10), currentPage: 0})
+    setPageInfo({
+      ...pageInfo,
+      per_page: parseInt(event.target.value, 10),
+      currentPage: 0,
+    });
   };
 
-  console.log({ users, pageInfo });
+  useEffect(() => {
+    getAllUsers(pageInfo.currentPage);
+  }, []);
+
+  const getUserDataBasedOnID =  async (id: number) => {
+    try {
+       const response = await axios.get(`https://reqres.in/api/users/${id}`)
+       const name = response.data.data.first_name + ' ' +  response.data.data.last_name
+       setSelectedUser({ ...selectedUser, name: name, id: id })
+    } catch (error: any) {
+      toast.error(error, {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+    }
+  }
+
+  const handleOpen = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, type: 'add' | 'edit', id?: number) => {
+      setOpen(true)
+      setType(type)
+      if(type === 'edit' && id !== undefined){
+        getUserDataBasedOnID(id)
+      }
+  }
+
+  const handleCloseDialog = () => {
+    setOpen(false)
+    setSelectedUser({ name: '', job: '', id: 0 })
+  }
 
   return (
     <Layout>
       <Fragment>
-        <h1>LIST OF USERS</h1>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+          <h1>LIST OF USERS</h1>
+          <Button variant="contained" startIcon={<AddOutlined />} onClick={(e) => handleOpen(e, 'add')}>
+            Add User
+          </Button>
+        </Box>
         <TableContainer component={Paper} sx={{ marginTop: "2rem" }}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
@@ -185,22 +239,17 @@ function UsersDashboard() {
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell
-                  
                     sx={{ display: "flex", alignItems: "center", gap: "1rem" }}
                   >
                     <Avatar alt="username" src={user.avatar} />
-                    <span>{user.first_name + user.last_name}</span>
+                    <span>{user.first_name + ' ' + user.last_name}</span>
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    <IconButton
-                      onClick={() => console.log("clicked", user.id)}
-                    >
+                    <IconButton onClick={(e) => handleOpen(e, 'edit', user.id)}>
                       <ModeEditOutlineOutlined />
                     </IconButton>
-                    <IconButton
-                      onClick={() => console.log("clicked", user.id)}
-                    >
+                    <IconButton onClick={() => console.log("clicked", user.id)}>
                       <FileCopyOutlined />
                     </IconButton>
                   </TableCell>
@@ -223,6 +272,7 @@ function UsersDashboard() {
             </TableFooter>
           </Table>
         </TableContainer>
+        <UserDialog open={open} handleClose={handleCloseDialog} type={type} user={selectedUser}  setSelectedUser={setSelectedUser} />
       </Fragment>
     </Layout>
   );
