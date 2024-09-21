@@ -5,13 +5,24 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
+  const token = localStorage.getItem("oidc");
+
   return (
     <div className="app">
       <BrowserRouter>
         <Routes>
-          <Route element={<Login />} path="login" />
-          <Route element={<UsersDashboard />} path="dashboard" />
-          <Route path="/" element={<Navigate to="/login" />} />
+          <Route
+            path="login"
+            element={token ? <Navigate to="/dashboard" /> : <Login />}
+          />
+          <Route
+            path="dashboard"
+            element={token ? <UsersDashboard /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/"
+            element={<Navigate to={token ? "/dashboard" : "/login"} />}
+          />
         </Routes>
       </BrowserRouter>
       <ToastContainer
