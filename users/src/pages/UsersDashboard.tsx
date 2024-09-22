@@ -226,6 +226,7 @@ function UsersDashboard(props: Props) {
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
+                <TableCell></TableCell>
                 <TableCell>
                   <b>Name</b>
                 </TableCell>
@@ -243,10 +244,11 @@ function UsersDashboard(props: Props) {
                   key={user.id}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
+                  <TableCell>
+                  <Avatar alt="username" src={user.avatar} />
+                  </TableCell>
                   <TableCell
-                    sx={{ display: "flex", alignItems: "center", gap: "1rem" }}
                   >
-                    <Avatar alt="username" src={user.avatar} />
                     <span>{user.first_name + ' ' + user.last_name}</span>
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
