@@ -27,10 +27,11 @@ interface Props {
 export default function UserDialog(props: Props) {
 
 const { open, type, user, handleClose, setSelectedUser } = props 
+const apiURL = import.meta.env.VITE_API_URL;
 
 const addNewUser = async() => {
   try {
-    await axios.post('https://reqres.in/api/users', user)
+    await axios.post(`${apiURL}/users`, user)
     toast.success('User added successfully', {
         position: "bottom-center",
         autoClose: 5000,
@@ -61,7 +62,7 @@ const addNewUser = async() => {
 
 const editUser = async() => {
     try {
-      await axios.put(`https://reqres.in/api/users/${user.id}`, user)
+      await axios.put(`${apiURL}/users/${user.id}`, user)
       toast.success('User updated successfully', {
           position: "bottom-center",
           autoClose: 5000,

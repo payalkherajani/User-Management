@@ -24,10 +24,10 @@ import {
   KeyboardArrowRight,
   KeyboardArrowLeft,
   ModeEditOutlineOutlined,
-  FileCopyOutlined,
   AddOutlined
 } from "@mui/icons-material";
 import UserDialog from "../components/UserDialog";
+import FilePreview from "../components/FilePreview";
 
 interface TablePaginationActionsProps {
   count: number;
@@ -109,7 +109,11 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
   );
 }
 
-function UsersDashboard() {
+interface Props {
+  handleLogout: () => void
+}
+
+function UsersDashboard(props: Props) {
   const [users, setUsers] = useState([]);
   const [pageInfo, setPageInfo] = useState({
     currentPage: 0,
@@ -124,11 +128,12 @@ function UsersDashboard() {
     id: 0,
   })
   const [type, setType] = useState<'add' | 'edit' | null>(null)
+  const apiURL = import.meta.env.VITE_API_URL;
 
   const getAllUsers = async (page: number) => {
     try {
       const response = await axios.get(
-        `https://reqres.in/api/users?page=${page}`
+        `${apiURL}/users/?page=${page}`
       );
       setUsers(response.data.data);
       setPageInfo({
@@ -178,7 +183,7 @@ function UsersDashboard() {
 
   const getUserDataBasedOnID =  async (id: number) => {
     try {
-       const response = await axios.get(`https://reqres.in/api/users/${id}`)
+       const response = await axios.get(`${apiURL}/users/${id}`)
        const name = response.data.data.first_name + ' ' +  response.data.data.last_name
        setSelectedUser({ ...selectedUser, name: name, id: id })
     } catch (error: any) {
@@ -209,10 +214,10 @@ function UsersDashboard() {
   }
 
   return (
-    <Layout>
+    <Layout handleLogout={props.handleLogout}>
       <Fragment>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-          <h1>LIST OF USERS</h1>
+          <h4>LIST OF USERS</h4>
           <Button variant="contained" startIcon={<AddOutlined />} onClick={(e) => handleOpen(e, 'add')}>
             Add User
           </Button>
@@ -249,8 +254,8 @@ function UsersDashboard() {
                     <IconButton onClick={(e) => handleOpen(e, 'edit', user.id)}>
                       <ModeEditOutlineOutlined />
                     </IconButton>
-                    <IconButton onClick={() => console.log("clicked", user.id)}>
-                      <FileCopyOutlined />
+                    <IconButton>
+                      <FilePreview />
                     </IconButton>
                   </TableCell>
                 </TableRow>

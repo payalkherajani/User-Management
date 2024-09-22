@@ -6,17 +6,13 @@ import {
   Box,
   ListItemButton,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
 
-const SidebarCommonList = () => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("oidc");
-    navigate("/login");
-  };
+interface Props {
+  handleLogout: () => void
+}
+const SidebarCommonList = (props: Props) => {
 
   return (
     <>
@@ -51,7 +47,7 @@ const SidebarCommonList = () => {
             <ListItemText
               primary={"Logout"}
               sx={{ fontSize: "14px" }}
-              onClick={handleLogout}
+              onClick={props.handleLogout}
             />
           </ListItemButton>
         </List>

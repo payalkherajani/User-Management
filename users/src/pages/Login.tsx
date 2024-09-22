@@ -7,6 +7,8 @@ import {
   InputAdornment,
   IconButton,
   CircularProgress,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import video from "../assets/test.mp4";
 import * as Yup from "yup";
@@ -30,7 +32,10 @@ const validationSchema = Yup.object().shape({
     .required("Password is required"),
 });
 
-const Login: FC = () => {
+interface Props {
+  setToken: React.Dispatch<React.SetStateAction<string | null>>
+}
+const Login: FC<Props> = (props) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -41,6 +46,8 @@ const Login: FC = () => {
     {}
   );
   const [loading, setLoading] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const navigate = useNavigate();
 
@@ -73,6 +80,7 @@ const Login: FC = () => {
       ) {
         const token = import.meta.env.VITE_LOGIN_TOKEN;
         Boolean(token) && localStorage.setItem("oidc", JSON.stringify(token));
+        props.setToken(token)
         navigate("/dashboard");
       } else {
         toast.error("Incorrect username or password", {
@@ -122,24 +130,29 @@ const Login: FC = () => {
         disableGutters
       >
         <Grid container style={{ height: "inherit" }}>
-          <Grid size={6}>
-            <video
-              width="600"
-              muted
-              style={{
-                height: "100%",
-                objectFit: "cover",
-                top: 0,
-                left: 0,
-                width: "100%",
-              }}
-              ref={videoRef}
-            >
-              <source src={video} type="video/mp4" />
-            </video>
-          </Grid>
+          {
+            !isMobile && (
+              <Grid size={6}>
+              <video
+                width="600"
+                muted
+                style={{
+                  height: "100%",
+                  objectFit: "cover",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                }}
+                ref={videoRef}
+              >
+                <source src={video} type="video/mp4" />
+              </video>
+            </Grid>
+            )
+          }
+
           <Grid
-            size={6}
+            size={isMobile ? 12 : 6}
             sx={{
               display: "flex",
               justifyContent: "center",
@@ -156,6 +169,7 @@ const Login: FC = () => {
                 width: "70%",
               }}
             >
+              <h1>LOGIN TO UMP</h1>
               <form
                 style={{
                   width: "100%",
